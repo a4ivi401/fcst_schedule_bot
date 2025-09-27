@@ -26,14 +26,14 @@ def load_schedule_cache():
 
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    await message.answer("👋 Привіт! Я бот для перегляду розкладу. Використовуй /today для перегляду розкладу на сьогодні або /week для перегляду розкладу на тиждень")
+    await message.answer("👋 Привіт! Я бот для перегляду розкладу. Використовуй:\n /today для перегляду розкладу на сьогодні \n /week для перегляду розкладу на тиждень")
 
 @dp.message(Command("today"))
 async def cmd_today(message: types.Message):
     schedule = load_schedule_cache()
 
     if not schedule:
-        await message.answer("🚫Розклад не знайдено. Спробуй пізніше.")
+        await message.answer("Розклад не знайдено. Спробуй пізніше.")
         return
 
     from datetime import datetime
@@ -49,16 +49,19 @@ async def cmd_today(message: types.Message):
 
     lessons = schedule.get(today_name, [])
     if not lessons:
-        await message.answer(f"Сьогодні ({today_name}) пар немає.")
+        await message.answer(f"🥳 Сьогодні ({today_name}) пар немає.")
         return
 
-    response = f"Розклад на {today_name}:\n"
+    response = f"📅 Розклад на <b>{today_name}</b>:\n\n"
     for lesson in lessons:
-        response += f"{lesson['time']} — {lesson['subject']}\n"
-        response += f" Викладач: {lesson['teacher']}\n"
-        response += f" Аудиторія: {lesson['room']}\n\n"
+        response += (
+            f"🔸 <b>{lesson['lesson_number']}. {lesson['time']}</b>\n"
+            f" <b>Предмет:</b> {lesson['subject']}\n"
+            f" <b>Викладач:</b> <b>{lesson['teacher']}</b>\n"
+            f" <b>Аудиторія:</b> <b>{lesson['room']}</b>\n\n"
+        )
     
-    await message.answer(response)
+    await message.answer(response, parse_mode="HTML")
 
 @dp.message(Command("week"))
 async def cmd_week(message: types.Message):
@@ -70,13 +73,16 @@ async def cmd_week(message: types.Message):
 
     response = "Розклад на тиждень:\n\n"
     for day, lessons in schedule.items():
-        response += f"📅 {day}:\n"
+        response += f"📅 <b>{day}</b>:\n"
         if lessons:
             for lesson in lessons:
-                response += f"{lesson['time']} — {lesson['subject']}\n"
-                response += f" Викладач: {lesson['teacher']}\n"
-                response += f" Аудиторія: {lesson['room']}\n\n"
+                response += (
+                    f"🔸 <b>{lesson['lesson_number']}. {lesson['time']}</b>\n"
+                    f" <b>Предмет:</b> {lesson['subject']}\n"
+                    f" <b>Викладач:</b> <b>{lesson['teacher']}</b>\n"
+                    f" <b>Аудиторія:</b> <b>{lesson['room']}</b>\n\n"
+                )
         else:
             response += "😃 Пар немає\n\n"
 
-    await message.answer(response)
+    await message.answer(response, parse_mode="HTML")
