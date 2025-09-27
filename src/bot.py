@@ -20,7 +20,7 @@ dp = Dispatcher()
 
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    await message.answer("Привіт! Я бот для перегляду розкладу. Використовуй /today щоб подивитись розклад на сьогодні або /week щоб подивитись розклад на тиждень.")
+    await message.answer("Привіт! Я бот для перегляду розкладу. Використовуй /today або /week.")
 
 @dp.message(Command("today"))
 async def cmd_today(message: types.Message):
@@ -50,6 +50,8 @@ async def cmd_today(message: types.Message):
     response = f"Розклад на {today_name}:\n"
     for lesson in lessons:
         response += f"{lesson['time']} — {lesson['subject']}\n"
+        response += f"  Викладач: {lesson['teacher']}\n"
+        response += f"  Аудиторія: {lesson['room']}\n\n"
     
     await message.answer(response)
 
@@ -68,9 +70,10 @@ async def cmd_week(message: types.Message):
         if lessons:
             for lesson in lessons:
                 response += f"  {lesson['time']} — {lesson['subject']}\n"
+                response += f"    Викладач: {lesson['teacher']}\n"
+                response += f"    Аудиторія: {lesson['room']}\n\n"
         else:
-            response += "  Пар немає\n"
-        response += "\n"
+            response += "  Пар немає\n\n"
 
     await message.answer(response)
 
