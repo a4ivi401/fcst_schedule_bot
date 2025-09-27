@@ -1,10 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
+import json
+import os
 
 def get_current_week_type():
-    # Початок навчального тижня — 1 вересня 2024
-    start_date = datetime(2024, 9, 1)
+    # Початок навчального тижня — 1 вересня 2025
+    start_date = datetime(2025, 9, 1)
     today = datetime.now()
 
     # Кількість днів між датами
@@ -21,14 +23,14 @@ def get_current_week_type():
 def parse_schedule(url):
     response = requests.get(url)
     if response.status_code != 200:
-        print("Не вдалося отримати сторінку")
+        print("❌ Не вдалося отримати сторінку")
         return None
 
     soup = BeautifulSoup(response.text, 'html.parser')
 
     # Визначаємо, який тиждень зараз
     current_week = get_current_week_type()
-    print(f"Поточний тиждень: {current_week.upper()}")
+    print(f"🔍 Поточний тиждень: {current_week.upper()}")
 
     # Знаходимо всі блоки з розкладом
     wrappers = soup.find_all('div', {'class': 'wrapper'})
@@ -41,18 +43,21 @@ def parse_schedule(url):
 
         if "Тиждень 1" in header.get_text() and current_week == "week1":
             target_table = wrapper.find('table', {'class': 'schedule'})
+            print("✅ Вибрано таблицю для Тижня 1")
             break
         elif "Тиждень 2" in header.get_text() and current_week == "week2":
             target_table = wrapper.find('table', {'class': 'schedule'})
+            print("✅ Вибрано таблицю для Тижня 2")
             break
 
     if not target_table:
-        print(f"Таблиця для {current_week} не знайдена")
+        print("❌ Таблиця для поточного тижня не знайдена")
         return None
 
     # Отримуємо назви днів тижня
     header_row = target_table.find('thead').find('tr')
     day_names = [th.get_text(strip=True) for th in header_row.find_all('th', {'class': 'day-name'})]
+    print(f"📅 Дні тижня: {day_names}")
 
     # Отримуємо рядки з парами (tbody)
     rows = target_table.find_all('tr')
@@ -113,15 +118,17 @@ def parse_schedule(url):
 
     return schedule
 
-# Тест
-if __name__ == "__main__":
+def save_schedule_cache(schedule):
+    os.makedirs('data', exist_ok=True)
+    with open('data/schedule_cache.json', 'w', encoding='utf-8') as f:
+        json.dump(schedule, f, ensure_ascii=False, indent=2)
+
+def run_parser():
     url = "https://portal.nau.edu.ua/schedule/group?id=4349"
     schedule = parse_schedule(url)
 
     if schedule:
-        for day, lessons in schedule.items():
-            print(f"\n{day}:")
-            for lesson in lessons:
-                print(f"  {lesson['time']} | {lesson['subject']} | {lesson['teacher']} | {lesson['room']}")
+        save_schedule_cache(schedule)
+        print("✅ Розклад збережено в data/schedule_cache.json")
     else:
-        print("Помилка при отриманні розкладу.")
+        print("❌ Не вдалося отримати розклад.")

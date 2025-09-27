@@ -3,8 +3,7 @@ from aiogram.filters import Command
 import asyncio
 from dotenv import load_dotenv
 import os
-
-from src.parser import parse_schedule
+import json
 
 # Завантажуємо змінні з .env
 load_dotenv()
@@ -18,17 +17,23 @@ if not BOT_TOKEN:
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
+def load_schedule_cache():
+    path = 'data/schedule_cache.json'
+    if not os.path.exists(path):
+        return None
+    with open(path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     await message.answer("Привіт! Я бот для перегляду розкладу. Використовуй /today або /week.")
 
 @dp.message(Command("today"))
 async def cmd_today(message: types.Message):
-    url = "https://portal.nau.edu.ua/schedule/group?id=4349"
-    schedule = parse_schedule(url)
+    schedule = load_schedule_cache()
 
     if not schedule:
-        await message.answer("Не вдалося отримати розклад.")
+        await message.answer("Розклад не знайдено. Спробуй пізніше.")
         return
 
     from datetime import datetime
@@ -57,11 +62,10 @@ async def cmd_today(message: types.Message):
 
 @dp.message(Command("week"))
 async def cmd_week(message: types.Message):
-    url = "https://portal.nau.edu.ua/schedule/group?id=4349"
-    schedule = parse_schedule(url)
+    schedule = load_schedule_cache()
 
     if not schedule:
-        await message.answer("Не вдалося отримати розклад.")
+        await message.answer("Розклад не знайдено. Спробуй пізніше.")
         return
 
     response = "Розклад на тиждень:\n\n"
@@ -76,9 +80,3 @@ async def cmd_week(message: types.Message):
             response += "  Пар немає\n\n"
 
     await message.answer(response)
-
-async def main():
-    await dp.start_polling(bot)
-
-if __name__ == "__main__":
-    asyncio.run(main())
