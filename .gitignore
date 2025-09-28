@@ -6,3 +6,4 @@ data/
 *.log
 credentials.json
 .vscode/
+.pytest_cache/
