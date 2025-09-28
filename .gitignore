@@ -5,3 +5,4 @@ venv/
 data/
 *.log
 credentials.json
+.vscode/

@@ -12,12 +12,24 @@ async def start_scheduler():
         await asyncio.sleep(15 * 60)  # 15 хвилин
 
 async def start_calendar_sync():
+    from src.calendar_sync import load_schedule_hash, get_schedule_hash
+    from src.parser import load_schedule_cache
+
     while True:
-        # Кожну суботу о 00:00
-        now = datetime.now()
-        if now.weekday() == 5 and now.hour == 0 and now.minute < 5:  # Субота, 00:00–00:04
+        # Перевіряємо, чи змінився розклад
+        schedule = load_schedule_cache()
+        if not schedule:
+            await asyncio.sleep(15 * 60)  # Зачекати 15 хв, якщо немає розкладу
+            continue
+
+        current_hash = get_schedule_hash(schedule)
+        previous_hash = load_schedule_hash()
+
+        if current_hash != previous_hash:
+            print("🔄 Виявлено зміни в розкладі. Запускаємо синхронізацію календаря...")
             sync_calendar_task()
-        await asyncio.sleep(60)  # Перевіряємо кожну хвилину
+
+        await asyncio.sleep(15 * 60)  # Перевіряємо кожні 15 хвилин
 
 async def main():
     load_dotenv()

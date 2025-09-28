@@ -26,7 +26,7 @@ def load_schedule_cache():
 
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    await message.answer("👋 Привіт! Я бот для перегляду розкладу. Використовуй:\n /today для перегляду розкладу на сьогодні \n /week для перегляду розкладу на тиждень")
+    await message.answer("👋 Привіт! Я бот для перегляду розкладу. Використовуй:\n /today для перегляду розкладу на сьогодні \n /tomorrow для перегляду розкладу на завтра\n /week для перегляду розкладу на тиждень\n /calendar_link для отримання посилання на підписку на календар")
 
 @dp.message(Command("today"))
 async def cmd_today(message: types.Message):
@@ -56,7 +56,7 @@ async def cmd_today(message: types.Message):
     for lesson in lessons:
         response += (
             f"🔸 <b>{lesson['lesson_number']}. {lesson['time']}</b>\n"
-            f" <b>Предмет:</b> {lesson['subject']}\n"
+            f" <b>Предмет: {lesson['subject']}</b>\n"
             f" <b>Викладач:</b> <b>{lesson['teacher']}</b>\n"
             f" <b>Аудиторія:</b> <b>{lesson['room']}</b>\n\n"
         )
@@ -78,11 +78,58 @@ async def cmd_week(message: types.Message):
             for lesson in lessons:
                 response += (
                     f"🔸 <b>{lesson['lesson_number']}. {lesson['time']}</b>\n"
-                    f" <b>Предмет:</b> {lesson['subject']}\n"
+                    f" <b>Предмет: {lesson['subject']}</b>\n"
                     f" <b>Викладач:</b> <b>{lesson['teacher']}</b>\n"
                     f" <b>Аудиторія:</b> <b>{lesson['room']}</b>\n\n"
                 )
         else:
             response += "😃 Пар немає\n\n"
 
+
     await message.answer(response, parse_mode="HTML")
+
+@dp.message(Command("tomorrow"))
+async def cmd_tomorrow(message: types.Message):
+    schedule = load_schedule_cache()
+
+    if not schedule:
+        await message.answer("🚫Розклад не знайдено. Спробуй пізніше.")
+        return
+
+    from datetime import datetime, timedelta
+    tomorrow_name = {
+        0: "Понеділок",
+        1: "Вівторок",
+        2: "Середа",
+        3: "Четвер",
+        4: "П'ятниця",
+        5: "Субота",
+        6: "Неділя"
+    }[(datetime.now() + timedelta(days=1)).weekday()]
+
+    lessons = schedule.get(tomorrow_name, [])
+    if not lessons:
+        await message.answer(f"🥳 Завтра ({tomorrow_name}) пар немає.")
+        return
+
+    response = f"📅 Розклад на <b>{tomorrow_name}</b>:\n\n"
+    for lesson in lessons:
+        response += (
+            f"🔸 <b>{lesson['lesson_number']}. {lesson['time']}</b>\n"
+            f" <b>Предмет: {lesson['subject']}</b>\n"
+            f" <b>Викладач:</b> <b>{lesson['teacher']}</b>\n"
+            f" <b>Аудиторія:</b> <b>{lesson['room']}</b>\n\n"
+        )
+    
+    await message.answer(response, parse_mode="HTML")
+
+@dp.message(Command("calendar_link"))
+async def cmd_calendar_link(message: types.Message):
+    calendar_id = os.getenv("CALENDAR_ID")
+    if not calendar_id:
+        await message.answer("❌ Посилання на календар не доступне.")
+        return
+
+    # Посилання для підписки
+    link = f"https://calendar.google.com/calendar/embed?src={calendar_id}"
+    await message.answer(f"🔗 <a href='{link}'>Підписатися на календар</a>", parse_mode="HTML")

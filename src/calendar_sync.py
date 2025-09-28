@@ -4,7 +4,7 @@ from googleapiclient.discovery import build
 from datetime import datetime, timedelta
 import json
 import os
-from dotenv import load_dotenv  # Додай імпорт
+from dotenv import load_dotenv 
 
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
