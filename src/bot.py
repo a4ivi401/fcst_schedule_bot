@@ -125,11 +125,5 @@ async def cmd_tomorrow(message: types.Message):
 
 @dp.message(Command("calendar_link"))
 async def cmd_calendar_link(message: types.Message):
-    calendar_id = os.getenv("CALENDAR_ID")
-    if not calendar_id:
-        await message.answer("❌ Посилання на календар не доступне.")
-        return
-
-    # Посилання для підписки
-    link = f"https://calendar.google.com/calendar/embed?src={calendar_id}"
+    link = f"https://calendar.google.com/calendar/ical/fe91ff08b5d3cd8a289b6f50c824b2516972b0a6fa406ef80ddff40d29da3d96%40group.calendar.google.com/public/basic.ics"
     await message.answer(f"🔗 <a href='{link}'>Підписатися на календар</a>", parse_mode="HTML")
