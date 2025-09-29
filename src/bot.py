@@ -4,6 +4,16 @@ import asyncio
 from dotenv import load_dotenv
 import os
 import json
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("bot.log"),
+        logging.StreamHandler()
+    ]
+)
 
 # Завантажуємо змінні з .env
 load_dotenv()
