@@ -12,10 +12,11 @@ async def start_scheduler():
         await asyncio.sleep(15 * 60)  # 15 хвилин
 
 async def start_calendar_sync():
-    from src.calendar_sync import load_schedule_hash, get_schedule_hash
-    from src.parser import load_schedule_cache
+    from src.calendar_sync import load_schedule_hash, get_schedule_hash, load_schedule_cache
+
 
     while True:
+        sync_calendar_task()
         # Перевіряємо, чи змінився розклад
         schedule = load_schedule_cache()
         if not schedule:
@@ -41,10 +42,10 @@ async def main():
     bot = Bot(token=bot_token)
 
     # Запускаємо парсер фоном
-    scheduler_task = asyncio.create_task(start_scheduler())
+    asyncio.create_task(start_scheduler())
 
     # Запускаємо синхронізацію календаря
-    calendar_task = asyncio.create_task(start_calendar_sync())
+    asyncio.create_task(start_calendar_sync())
 
     # Запускаємо бота
     await dp.start_polling(bot)
