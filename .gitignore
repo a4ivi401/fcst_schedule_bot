@@ -7,3 +7,4 @@ data/
 credentials.json
 .vscode/
 .pytest_cache/
+vpn-config.ovpn
