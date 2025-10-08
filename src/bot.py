@@ -68,7 +68,8 @@ async def cmd_today(message: types.Message):
             f"🔸 <b>{lesson['lesson_number']}. {lesson['time']}</b>\n"
             f" <b>Предмет: {lesson['subject']}</b>\n"
             f" <b>Викладач:</b> <b>{lesson['teacher']}</b>\n"
-            f" <b>Аудиторія:</b> <b>{lesson['room']}</b>\n\n"
+            f" <b>Аудиторія:</b> <b>{lesson['room']}</b>\n"
+            f" <b>Тип:</b> <b>{lesson['activity']}</b>\n\n"
         )
     
     await message.answer(response, parse_mode="HTML")
