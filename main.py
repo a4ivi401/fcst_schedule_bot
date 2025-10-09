@@ -47,8 +47,16 @@ async def main():
     # Запускаємо синхронізацію календаря
     asyncio.create_task(start_calendar_sync())
 
-    # Запускаємо бота
-    await dp.start_polling(bot)
+    # Перемикання між webhook та polling
+    mode = os.getenv("BOT_MODE", "polling").lower() # polling за замовчуванням
+
+    if mode == "webhook":
+        print("🚀 Запуск бота у режимі webhook...")
+        from webhook_server import start_webhook
+        await start_webhook(dp, bot)
+    else:
+        print("🚀 Запуск бота у режимі polling...")
+        await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())
